@@ -60,7 +60,7 @@ import {
   TransformHandles,
   TransformHandleType,
 } from "../element/transformHandles";
-import { throttleRAF, isOnlyExportingSingleFrame } from "../utils";
+import { throttleRAF } from "../utils";
 import { UserIdleState } from "../types";
 import { FRAME_STYLE, THEME_FILTER } from "../constants";
 import {
@@ -369,7 +369,7 @@ const frameClip = (
 ) => {
   context.translate(frame.x + appState.scrollX, frame.y + appState.scrollY);
   context.beginPath();
-  if (context.roundRect && !renderConfig.isExporting) {
+  if (context.roundRect) {
     context.roundRect(
       0,
       0,
@@ -966,17 +966,12 @@ const _renderStaticScene = ({
     .filter((el) => !isEmbeddableOrFrameLabel(el))
     .forEach((element) => {
       try {
-        // - when exporting the whole canvas, we DO NOT apply clipping
-        // - when we are exporting a particular frame, apply clipping
-        //   if the containing frame is not selected, apply clipping
         const frameId = element.frameId || appState.frameToHighlight?.id;
 
         if (
           frameId &&
-          ((renderConfig.isExporting && isOnlyExportingSingleFrame(elements)) ||
-            (!renderConfig.isExporting &&
-              appState.frameRendering.enabled &&
-              appState.frameRendering.clip))
+          appState.frameRendering.enabled &&
+          appState.frameRendering.clip
         ) {
           context.save();
 
@@ -1027,10 +1022,8 @@ const _renderStaticScene = ({
 
         if (
           frameId &&
-          ((renderConfig.isExporting && isOnlyExportingSingleFrame(elements)) ||
-            (!renderConfig.isExporting &&
-              appState.frameRendering.enabled &&
-              appState.frameRendering.clip))
+          appState.frameRendering.enabled &&
+          appState.frameRendering.clip
         ) {
           context.save();
 
@@ -1483,7 +1476,6 @@ export const renderSceneToSvg = (
             element.x + offsetX,
             element.y + offsetY,
             exportWithDarkMode,
-            exportingFrameId,
             renderEmbeddables,
           );
         } catch (error: any) {
@@ -1506,7 +1498,6 @@ export const renderSceneToSvg = (
             element.x + offsetX,
             element.y + offsetY,
             exportWithDarkMode,
-            exportingFrameId,
             renderEmbeddables,
           );
         } catch (error: any) {

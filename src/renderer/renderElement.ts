@@ -589,11 +589,7 @@ export const renderElement = (
 ) => {
   switch (element.type) {
     case "frame": {
-      if (
-        !renderConfig.isExporting &&
-        appState.frameRendering.enabled &&
-        appState.frameRendering.outline
-      ) {
+      if (appState.frameRendering.enabled && appState.frameRendering.outline) {
         context.save();
         context.translate(
           element.x + appState.scrollX,
@@ -841,10 +837,9 @@ const maybeWrapNodesInFrameClipPath = (
   element: NonDeletedExcalidrawElement,
   root: SVGElement,
   nodes: SVGElement[],
-  exportedFrameId?: string | null,
 ) => {
   const frame = getContainingFrame(element);
-  if (frame && frame.id === exportedFrameId) {
+  if (frame) {
     const g = root.ownerDocument!.createElementNS(SVG_NS, "g");
     g.setAttributeNS(SVG_NS, "clip-path", `url(#${frame.id})`);
     nodes.forEach((node) => g.appendChild(node));
@@ -862,7 +857,6 @@ export const renderElementToSvg = (
   offsetX: number,
   offsetY: number,
   exportWithDarkMode?: boolean,
-  exportingFrameId?: string | null,
   renderEmbeddables?: boolean,
 ) => {
   const offset = { x: offsetX, y: offsetY };
@@ -927,12 +921,7 @@ export const renderElementToSvg = (
         }) rotate(${degree} ${cx} ${cy})`,
       );
 
-      const g = maybeWrapNodesInFrameClipPath(
-        element,
-        root,
-        [node],
-        exportingFrameId,
-      );
+      const g = maybeWrapNodesInFrameClipPath(element, root, [node]);
 
       g ? root.appendChild(g) : root.appendChild(node);
       break;
@@ -969,7 +958,6 @@ export const renderElementToSvg = (
         label.x + offset.x - element.x,
         label.y + offset.y - element.y,
         exportWithDarkMode,
-        exportingFrameId,
         renderEmbeddables,
       );
 
@@ -1115,12 +1103,7 @@ export const renderElementToSvg = (
         group.appendChild(node);
       });
 
-      const g = maybeWrapNodesInFrameClipPath(
-        element,
-        root,
-        [group, maskPath],
-        exportingFrameId,
-      );
+      const g = maybeWrapNodesInFrameClipPath(element, root, [group, maskPath]);
       if (g) {
         root.appendChild(g);
       } else {
@@ -1154,12 +1137,7 @@ export const renderElementToSvg = (
       path.setAttribute("d", getFreeDrawSvgPath(element));
       node.appendChild(path);
 
-      const g = maybeWrapNodesInFrameClipPath(
-        element,
-        root,
-        [node],
-        exportingFrameId,
-      );
+      const g = maybeWrapNodesInFrameClipPath(element, root, [node]);
 
       g ? root.appendChild(g) : root.appendChild(node);
       break;
@@ -1223,12 +1201,7 @@ export const renderElementToSvg = (
           }) rotate(${degree} ${cx} ${cy})`,
         );
 
-        const clipG = maybeWrapNodesInFrameClipPath(
-          element,
-          root,
-          [g],
-          exportingFrameId,
-        );
+        const clipG = maybeWrapNodesInFrameClipPath(element, root, [g]);
         clipG ? root.appendChild(clipG) : root.appendChild(g);
       }
       break;
@@ -1284,12 +1257,7 @@ export const renderElementToSvg = (
           node.appendChild(text);
         }
 
-        const g = maybeWrapNodesInFrameClipPath(
-          element,
-          root,
-          [node],
-          exportingFrameId,
-        );
+        const g = maybeWrapNodesInFrameClipPath(element, root, [node]);
 
         g ? root.appendChild(g) : root.appendChild(node);
       } else {

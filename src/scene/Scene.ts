@@ -66,16 +66,25 @@ class Scene {
   private static sceneMapByElement = new WeakMap<ExcalidrawElement, Scene>();
   private static sceneMapById = new Map<string, Scene>();
 
-  static mapElementToScene(elementKey: ElementKey, scene: Scene) {
+  static mapElementToScene(
+    elementKey: ElementKey,
+    scene: Scene,
+    mapElementIds = true,
+  ) {
     if (isIdKey(elementKey)) {
+      if (!mapElementIds) {
+        return;
+      }
       // for cases where we don't have access to the element object
       // (e.g. restore serialized appState with id references)
       this.sceneMapById.set(elementKey, scene);
     } else {
       this.sceneMapByElement.set(elementKey, scene);
-      // if mapping element objects, also cache the id string when later
-      // looking up by id alone
-      this.sceneMapById.set(elementKey.id, scene);
+      if (!mapElementIds) {
+        // if mapping element objects, also cache the id string when later
+        // looking up by id alone
+        this.sceneMapById.set(elementKey.id, scene);
+      }
     }
   }
 
@@ -217,7 +226,10 @@ class Scene {
     return didChange;
   }
 
-  replaceAllElements(nextElements: readonly ExcalidrawElement[]) {
+  replaceAllElements(
+    nextElements: readonly ExcalidrawElement[],
+    mapElementIds = true,
+  ) {
     this.elements = nextElements;
     const nextFrames: ExcalidrawFrameElement[] = [];
     this.elementsMap.clear();
